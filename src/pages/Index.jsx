@@ -5,6 +5,7 @@ const Index = () => {
   const [url, setUrl] = useState("");
   const [method, setMethod] = useState("GET");
   const [body, setBody] = useState("");
+  const [headers, setHeaders] = useState("");
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -13,10 +14,19 @@ const Index = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const headersObj = headers
+        .split("\n")
+        .map((line) => line.split(":"))
+        .reduce((acc, [key, value]) => {
+          acc[key.trim()] = value.trim();
+          return acc;
+        }, {});
+
       const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...headersObj,
         },
         body: method === "GET" ? null : body,
       });
@@ -60,6 +70,14 @@ const Index = () => {
               <Textarea value={body} onChange={(e) => setBody(e.target.value)} />
             </FormControl>
           )}
+          <FormControl>
+            <FormLabel>Headers</FormLabel>
+            <Textarea
+              value={headers}
+              onChange={(e) => setHeaders(e.target.value)}
+              placeholder="Header1: value1&#10;Header2: value2"
+            />
+          </FormControl>
           <Button type="submit" colorScheme="blue" isLoading={loading}>
             Send
           </Button>
